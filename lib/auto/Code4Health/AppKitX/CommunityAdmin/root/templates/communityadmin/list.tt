@@ -1,0 +1,25 @@
+[% META appkitfeature_tablesorter = 1 %]
+<h1>Communities</h1>
+<div class="content_block">
+    <table class="tablesorter">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            [% FOR com IN communities %]
+                <tr>
+                    <td>[% com.name %]</td>
+                    <td>[% com.status %]</td>
+                    <td>[% com.name %]</td>
+                </tr>
+            [% END %]
+        </tbody>
+    </table>
+</div>
+<div>
+    <a href="[% add_url %]" class="link_button link_button_add">Add</a>
+</div>
