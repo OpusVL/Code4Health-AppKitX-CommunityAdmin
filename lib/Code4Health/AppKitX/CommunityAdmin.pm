@@ -25,11 +25,11 @@ after 'setup_components' => sub {
 
 =head1 NAME
 
-Code4Health::AppKitX::CommunityAdmin - A brand new AppKitX component
+Code4Health::AppKitX::CommunityAdmin - Communities
 
 =head1 DESCRIPTION
 
-Frobnicates the whirligigs in a modular and reusable pattern
+Allow communities to be setup and modified.
 
 =head1 COPYRIGHT and LICENSE
 
