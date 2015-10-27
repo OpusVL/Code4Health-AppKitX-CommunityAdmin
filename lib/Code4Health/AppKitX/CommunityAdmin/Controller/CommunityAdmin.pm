@@ -59,4 +59,30 @@ sub add
     }
 }
 
+sub community_chain
+    : Chained('/')
+    : CaptureArgs(1)
+    : PathPart('community')
+    : AppKitFeature('Communities')
+{
+    my ($self, $c, $code) = @_;
+
+    my $community = $c->model('Users::Community')->find({ code => $code, status => 'active' });
+    $c->detach('/not_found') unless $community;
+    $c->stash->{community} = $community;
+    my $url = $c->uri_for($self->action_for('edit'), [$community->code]);
+    $c->stash->{url} = $url;
+    $self->add_breadcrumb($c, { name => $community->name, url => $url });
+}
+
+sub edit
+    : Chained('/community_chain')
+    : AppKitFeature('Communities')
+    : AppKitForm
+{
+    my ($self, $c) = @_;
+
+    $self->add_final_crumb($c, 'Edit');
+}
+
 1;
