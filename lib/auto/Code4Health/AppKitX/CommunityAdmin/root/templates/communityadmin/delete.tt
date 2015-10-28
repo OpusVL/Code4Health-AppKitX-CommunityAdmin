@@ -1,0 +1,10 @@
+<h1>Delete Community</h1>
+<div class="content_block">
+    <p>
+    Delete [% community.name %]?
+    </p>
+    <p>
+    You can not recover this data.
+    </p>
+</div>
+[% form.render | none %]

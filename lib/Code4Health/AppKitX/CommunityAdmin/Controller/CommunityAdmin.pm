@@ -2,6 +2,7 @@ package Code4Health::AppKitX::CommunityAdmin::Controller::CommunityAdmin;
 
 use Moose;
 use namespace::autoclean;
+use Text::CSV;
 BEGIN { extends 'Catalyst::Controller::HTML::FormFu'; };
 with 'OpusVL::AppKit::RolesFor::Controller::GUI';
 
@@ -106,7 +107,7 @@ sub edit
             code => $form->param_value('code'),
         };
         $community->update($data);
-        $c->flash->{status_msg} = 'Added community';
+        $c->flash->{status_msg} = 'Changes saved';
         $c->res->redirect($c->stash->{index_url});
     }
     else
@@ -116,6 +117,60 @@ sub edit
             code => $community->code,
         });
     }
+}
+
+sub delete
+    : Chained('community_chain')
+    : AppKitFeature('Communities')
+    : AppKitForm
+    : PathPart('delete')
+{
+    my ($self, $c) = @_;
+
+    $self->add_final_crumb($c, 'Delete');
+    if($c->req->param('cancel'))
+    {
+        $c->res->redirect($c->stash->{index_url});
+        $c->detach;
+    }
+    my $form = $c->stash->{form};
+    my $community = $c->stash->{community};
+    if($form->submitted_and_valid)
+    {
+        $community->delete;
+        $c->flash->{status_msg} = 'Changes saved';
+        $c->res->redirect($c->stash->{index_url});
+    }
+}
+
+sub member_list
+    : Chained('community_chain')
+    : AppKitFeature('Communities')
+    : PathPart('members')
+{
+    my ($self, $c) = @_;
+
+    # produce a csv of the members.
+    my $community = $c->stash->{community};
+    my $people = $community->people;
+    my @people = $people->search(undef, {
+        order_by => ['surname', 'first_name'],
+        columns => [qw/first_name surname email_address/]
+    })->all;
+    my @data = map { [ $_->first_name, $_->surname, $_->email_address ] } @people;
+    my $csv = Text::CSV->new ( { binary => 1 } )
+        or die "Cannot use CSV: ".Text::CSV->error_diag ();
+    my $data = '';
+    open my $fh, '>', \$data;
+    $csv->print ($fh, $_) for @data;
+    close $fh;
+
+
+    my $content_type = 'text/csv';
+    my $safe_code = $community->code =~ s/[^\w_-]/-/gr;
+    my $filename = $safe_code . '-members.csv';
+
+    $c->forward( $c->view('DownloadFile'), [ { content_type => $content_type, body => $data, header => $filename } ] );
 }
 
 1;

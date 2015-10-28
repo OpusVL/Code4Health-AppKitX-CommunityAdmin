@@ -16,7 +16,21 @@
                     <td>[% com.code %]</td>
                     <td>[% com.name %]</td>
                     <td>[% com.status %]</td>
-                    <td><a href="[% url('edit', com) %]">edit</a></td>
+                    <td>
+                      <ul class="control-container">
+                        <li class="control-edit-small">
+                          <ul class="dropdown">
+                            <li>
+                                <a href="[% url('edit', com) %]">edit</a>
+                            </li><li>
+                                <a href="[% url('member_list', com) %]">members</a>
+                            </li><li>
+                                <a href="[% url('delete', com) %]">delete</a>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </td>
                 </tr>
             [% END %]
         </tbody>
