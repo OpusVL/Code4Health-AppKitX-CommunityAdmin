@@ -32,6 +32,13 @@ sub list
 
     $c->stash->{communities} = $communities;
     $c->stash->{add_url} = $c->uri_for($self->action_for('add'));
+    $c->stash->{url} = sub
+    {
+        my $action_name = shift;
+        my $community = shift;
+        my $action = $self->action_for($action_name);
+        return $c->uri_for($action, [ $community->code ]);
+    };
 }
 
 sub add
@@ -52,6 +59,7 @@ sub add
     {
         my $data = {
             name => $form->param_value('name'),
+            code => $form->param_value('code'),
         };
         $c->model('Users::Community')->create($data);
         $c->flash->{status_msg} = 'Added community';
@@ -76,13 +84,38 @@ sub community_chain
 }
 
 sub edit
-    : Chained('/community_chain')
+    : Chained('community_chain')
     : AppKitFeature('Communities')
-    : AppKitForm
+    : AppKitForm('communityadmin/add.yml')
+    : PathPart('edit')
 {
     my ($self, $c) = @_;
 
     $self->add_final_crumb($c, 'Edit');
+    if($c->req->param('cancel'))
+    {
+        $c->res->redirect($c->stash->{index_url});
+        $c->detach;
+    }
+    my $form = $c->stash->{form};
+    my $community = $c->stash->{community};
+    if($form->submitted_and_valid)
+    {
+        my $data = {
+            name => $form->param_value('name'),
+            code => $form->param_value('code'),
+        };
+        $community->update($data);
+        $c->flash->{status_msg} = 'Added community';
+        $c->res->redirect($c->stash->{index_url});
+    }
+    else
+    {
+        $form->default_values({
+            name => $community->name,
+            code => $community->code,
+        });
+    }
 }
 
 1;

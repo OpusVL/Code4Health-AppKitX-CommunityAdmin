@@ -11,8 +11,16 @@ elements:
     elements:
 
       - type: Text
+        name: code
+        label: Code
+        constraints:
+          - Required
+
+      - type: Text
         name: name
         label: Name
+        constraints:
+          - Required
 
   - type: Block
     name: buttons
