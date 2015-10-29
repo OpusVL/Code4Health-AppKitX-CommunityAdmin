@@ -162,7 +162,11 @@ sub member_list
         or die "Cannot use CSV: ".Text::CSV->error_diag ();
     my $data = '';
     open my $fh, '>', \$data;
-    $csv->print ($fh, $_) for @data;
+    for (@data)
+    {
+        $csv->print ($fh, $_);
+        print $fh "\r\n";
+    }
     close $fh;
 
 
