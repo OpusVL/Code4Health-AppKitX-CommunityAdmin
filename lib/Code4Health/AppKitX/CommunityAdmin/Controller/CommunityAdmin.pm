@@ -150,18 +150,34 @@ sub member_list
 {
     my ($self, $c) = @_;
 
+    my $retArr = sub {
+      my ($type, $prefs) = @_;
+      return scalar(grep { $_ eq $type } @$prefs)
+        ? 'Yes' : 'No';
+    };
+
+    my $ePrefs = sub {
+        my $prefs = shift;
+        if ($prefs) {
+            my @ret;
+            my @types = qw/members communities supporters/;
+            return map { $retArr->($_, $prefs) } @types;
+        }
+    };
     # produce a csv of the members.
     my $community = $c->stash->{community};
     my $people = $community->people;
     my @people = $people->search(undef, {
         order_by => ['surname', 'first_name'],
-        columns => [qw/first_name surname email_address/]
+        columns => [qw/first_name surname email_address show_membership email_preferences/]
     })->all;
-    my @data = map { [ $_->first_name, $_->surname, $_->email_address ] } @people;
+    my @data = map { [ $_->first_name, $_->surname, $_->email_address, $_->show_membership ? 'Yes' : 'No', $ePrefs->($_->email_preferences) ] } @people;
     my $csv = Text::CSV->new ( { binary => 1 } )
         or die "Cannot use CSV: ".Text::CSV->error_diag ();
     my $data = '';
     open my $fh, '>', \$data;
+    $csv->print($fh, ['First Name', 'Surname', 'Email Address', 'Show Membership', 'General C4H Emails', 'Community Specific Emails', 'Emails from supporters']);
+    print $fh "\r\n";
     for (@data)
     {
         $csv->print ($fh, $_);
